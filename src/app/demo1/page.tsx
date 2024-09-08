@@ -1,8 +1,10 @@
+import Title from "@components/Title";
 
 export default function Demo1() {
   return (
     <div>
-        <h1>Hello demo</h1>
+      <Title />
+      <h1>Hello demo</h1>
     </div>
   );
 }

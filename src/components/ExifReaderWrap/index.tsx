@@ -41,6 +41,11 @@ const ExifReaderWrap = () => {
       }
     },
     beforeUpload: async (file) => {
+      const size = file.size / 1024 / 1024
+      if (size >  5) {
+        message.error("文件大小最大支持5M");
+        return false;
+      }
       const base64 = await getBase64(file)
       setFileList([...fileList, base64]);
       console.log(fileList, base64, 'index-37')

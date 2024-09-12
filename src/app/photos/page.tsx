@@ -9,7 +9,6 @@ export default function Demo1() {
     <div>
       <Title />
       <ExifReaderWrap />
-      <h1>Hello demo</h1>
     </div>
   );
 }

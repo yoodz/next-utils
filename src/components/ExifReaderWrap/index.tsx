@@ -14,7 +14,7 @@ const getBase64 = (file): Promise<string> =>
     reader.onerror = (error) => reject(error);
   });
 
-
+const MAX_FILE_SIZE = 30;
 const ExifReaderWrap = () => {
   const [imageData, setImageData] = useState(null);
   const [exifData, setExifData] = useState(null);
@@ -42,7 +42,7 @@ const ExifReaderWrap = () => {
     },
     beforeUpload: async (file) => {
       const size = file.size / 1024 / 1024
-      if (size >  5) {
+      if (size > MAX_FILE_SIZE) {
         message.error("文件大小最大支持5M");
         return false;
       }

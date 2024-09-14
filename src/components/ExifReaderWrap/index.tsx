@@ -7,14 +7,6 @@ import { fabric } from "fabric";
 
 const { Dragger } = Upload;
 
-const getBase64 = (file): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
-
 const MAX_FILE_SIZE = 30;
 const ExifReaderWrap = () => {
   const [imageData, setImageData] = useState(null);
@@ -28,7 +20,7 @@ const ExifReaderWrap = () => {
     // action: 'https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload',
     async onChange(info) {
       const { status, originFileObj } = info.file;
-
+      console.log(status, 'index-31')
       if (status !== 'uploading') {
         console.log(info.file, info.fileList);
       }
@@ -40,27 +32,38 @@ const ExifReaderWrap = () => {
         message.success(`${info.file.name} file uploaded successfully.`);
 
         var reader = new FileReader();
-            
         reader.onload = function (e) {
-            // 创建图像元素
-            var imgElement = new Image();
-            imgElement.src = e.target.result;
+          // 创建图像元素
+          var imgElement = new Image();
+          imgElement.src = e.target.result;
 
-            // 创建 fabric.Image 对象
-            imgElement.onload = function () {
-                var imgInstance = new fabric.Image(imgElement, {
-                    left: 100,
-                    top: 100,
-                    angle: 0,
-                    opacity: 1.0
-                });
+          // 创建 fabric.Image 对象
+          imgElement.onload = function () {
+            var canvasWidth = refNewCanvas.current.getWidth();
+            var canvasHeight = refNewCanvas.current.getHeight();
+            // 计算图像的高度比例
+            var aspectRatio = imgElement.height / imgElement.width;
+            console.log(aspectRatio, 'index-55')
 
-                // 将图像添加到画布中
-                refNewCanvas.current.add(imgInstance);
-                refNewCanvas.current.renderAll();
-            };
+
+            var scaleX = canvasWidth / imgElement.width;
+            var scaleY = canvasHeight / imgElement.height;
+            var scale = Math.min(scaleX, scaleY);
+            var imgInstance = new fabric.Image(imgElement, {
+              left: 0,
+              top: 0,
+              angle: 0,
+              opacity: 1.0,
+              scaleX: scale, // 缩放图像宽度
+              scaleY: scale // 垂直缩放比例
+
+            });
+
+            // 将图像添加到画布中
+            refNewCanvas.current.add(imgInstance);
+            refNewCanvas.current.renderAll();
+          };
         };
-
         // 将文件读取为数据 URL
         reader.readAsDataURL(originFileObj);
 
@@ -75,10 +78,6 @@ const ExifReaderWrap = () => {
         message.error("文件大小最大支持5M");
         return false;
       }
-      const base64 = await getBase64(file)
-      setFileList([...fileList, base64]);
-      console.log(fileList, base64, 'index-37')
-      return false;
     },
     onDrop(e) {
       console.log('Dropped files', e.dataTransfer.files);
@@ -90,10 +89,9 @@ const ExifReaderWrap = () => {
     refNewCanvas.current = new fabric.Canvas(canvasEl.current, {
       backgroundColor: '#fffffb',
       width: 768,
-      height: 576,
+      height: 768,
     });
 
-    // setCanvas(newCanvas);
 
     const rect = new fabric.Rect({
       left: 100,
@@ -113,16 +111,13 @@ const ExifReaderWrap = () => {
     });
 
     const circle = new fabric.Circle({
-      left: 100,
-      top: 100,
+      left: 700,
+      top: 700,
       fill: 'yellow',
       radius: 50,
     });
     refNewCanvas.current.add(circle);
     refNewCanvas.current.add(rect);
-
-
-
   }, []);
   return (
     <div>
@@ -136,9 +131,6 @@ const ExifReaderWrap = () => {
           banned files.
         </p>
       </Dragger>
-      {/* {imageData && <img src={imageData} alt="Selected" style={{ maxWidth: '500px' }} />} */}
-
-      {fileList.map((item) => <img src={item} alt="Selected" style={{ maxWidth: '500px' }} />)}
 
       <canvas width="300" height="300" ref={canvasEl} />;
     </div>
